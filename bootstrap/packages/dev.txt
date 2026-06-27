@@ -1,0 +1,8 @@
+docker
+docker-compose
+dotnet-sdk
+aspnet-runtime
+dotnet-sdk-8
+aspnet-runtime-8
+nodejs
+npm

@@ -1,0 +1,15 @@
+git
+curl
+wget
+fzf
+fd
+fastfetch
+unzip
+zip
+tree
+vim
+zsh
+pipewire
+alacritty
+man-db
+man-pages
