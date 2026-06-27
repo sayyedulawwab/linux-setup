@@ -15,4 +15,4 @@ wl-clipboard
 brightnessctl
 playerctl
 
-polkit-kde-agent
+dolphin
