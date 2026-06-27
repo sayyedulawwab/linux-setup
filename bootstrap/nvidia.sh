@@ -11,7 +11,10 @@ sudo pacman -S \
     nvidia-open-dkms \
     nvidia-utils \
     nvidia-settings \
-    egl-wayland
+    egl-wayland \
+    mesa \
+    vulkan-icd-loader \
+    libva-nvidia-driver
 
 echo "==> Configuring NVIDIA DRM"
 
@@ -21,6 +24,14 @@ cat <<EOF | sudo tee /etc/modprobe.d/nvidia.conf
 options nvidia_drm modeset=1
 EOF
 
+echo
+echo "Add the following modules to /etc/mkinitcpio.conf if desired:"
+echo
+echo "nvidia nvidia_modeset nvidia_uvm nvidia_drm"
+echo
 echo "==> Rebuilding initramfs"
-
 sudo mkinitcpio -P
+
+echo "==> NVIDIA setup complete"
+echo
+echo "Remember to reboot."
