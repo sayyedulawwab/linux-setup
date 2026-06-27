@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-sudo pacman -S docker
+set -euo pipefail
+
+echo "==> Configuring Docker"
 
 sudo usermod -aG docker "$USER"
 
-sudo systemctl enable docker
-sudo systemctl start docker
+sudo systemctl enable --now docker
+
+echo "==> Docker configured"
+
+echo
+echo "Logout/login required for docker group changes"

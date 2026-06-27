@@ -5,17 +5,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "==> Updating system"
-sudo pacman -Syu
-
-echo "==> Installing packages"
-
-for file in "$REPO_DIR"/bootstrap/packages/*.txt
-do
-    sudo pacman -S --needed --noconfirm $(grep -v '^#' "$file")
-done
-
-echo "==> Installing Brave"
-curl -fsS https://dl.brave.com/install.sh | sh
+sudo pacman -Syu --noconfirm
 
 echo "==> Installing paru"
 
@@ -32,8 +22,29 @@ if ! command -v paru >/dev/null 2>&1; then
     rm -rf "$TMPDIR"
 fi
 
+echo "==> Installing pacman packages"
+
+for file in "$REPO_DIR"/bootstrap/packages/*.txt
+do
+    [[ "$(basename "$file")" == "aur.txt" ]] && continue
+
+    mapfile -t packages < <(
+        grep -Ev '^\s*$|^\s*#' "$file"
+    )
+
+    if (( ${#packages[@]} > 0 )); then
+        sudo pacman -S --needed --noconfirm "${packages[@]}"
+    fi
+done
+
 echo "==> Installing AUR packages"
-paru -S --needed --noconfirm hyprpaper-git
+
+mapfile -t aur_packages < <(
+    grep -Ev '^\s*$|^\s*#' \
+    "$REPO_DIR/bootstrap/packages/aur.txt"
+)
+
+paru -S --needed --noconfirm "${aur_packages[@]}"
 
 echo "==> Running NVIDIA setup"
 bash "$REPO_DIR/bootstrap/nvidia.sh"
@@ -43,15 +54,22 @@ bash "$REPO_DIR/bootstrap/docker.sh"
 
 echo "==> Applying dotfiles"
 
-sudo pacman -S --needed --noconfirm stow
-
 cd "$REPO_DIR/dotfiles"
 
-stow shell
-stow vim
-stow alacritty
-stow hypr
-stow waybar
-stow walls
+for dir in */
+do
+    stow "${dir%/}"
+done
 
-echo "==> Setup complete"
+echo "==> Enabling services"
+
+systemctl --user daemon-reload
+
+sudo systemctl enable --now docker
+sudo systemctl enable --now fstrim.timer
+
+echo
+echo "======================================"
+echo "Setup complete"
+echo "Reboot recommended"
+echo "======================================"

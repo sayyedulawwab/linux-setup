@@ -1,0 +1,7 @@
+brave-bin
+
+visual-studio-code-bin
+
+rider
+
+hyprpaper-git
