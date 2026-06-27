@@ -3,6 +3,56 @@
 source ./utils.sh
 
 ########################################
+# Installation Configuration
+########################################
+
+echo
+info "Available disks:"
+lsblk -d -o NAME,SIZE,MODEL
+
+echo
+read -rp "Disk to install to (example: /dev/nvme0n1): " DISK
+[[ -b "$DISK" ]] || error "Invalid disk"
+
+read -rp "Hostname: " HOSTNAME
+read -rp "Username: " USERNAME
+
+read -rp "Timezone [Asia/Dhaka]: " TIMEZONE
+TIMEZONE=${TIMEZONE:-Asia/Dhaka}
+
+read -rp "Locale [en_US.UTF-8]: " LOCALE
+LOCALE=${LOCALE:-en_US.UTF-8}
+
+read -rp "EFI size [2G]: " EFI_SIZE
+EFI_SIZE=${EFI_SIZE:-2G}
+
+read -rp "Root size [200G]: " ROOT_SIZE
+ROOT_SIZE=${ROOT_SIZE:-200G}
+
+echo
+read -rsp "Root password: " ROOT_PASSWORD
+echo
+
+read -rsp "User password: " USER_PASSWORD
+echo
+
+echo
+warn "Installation Summary"
+
+cat <<EOF
+Disk:         $DISK
+Hostname:     $HOSTNAME
+Username:     $USERNAME
+Timezone:     $TIMEZONE
+Locale:       $LOCALE
+EFI Size:     $EFI_SIZE
+Root Size:    $ROOT_SIZE
+EOF
+
+echo
+confirm "Continue?" || exit 0
+
+########################################
 # Helpers
 ########################################
 
@@ -14,7 +64,13 @@ cleanup() {
 ########################################
 # Auto-cleanup on failure
 ########################################
-trap 'warn "Unexpected error, cleaning up..."; cleanup' ERR
+trap cleanup EXIT
+trap 'error "Installation failed"' ERR
+
+
+DEFAULT_EFI_SIZE="2G"
+DEFAULT_ROOT_SIZE="200G"
+DEFAULT_TZ="Asia/Dhaka"
 
 ########################################
 # Internet
@@ -23,13 +79,24 @@ info "Checking internet connection"
 ping -c 1 archlinux.org &>/dev/null || error "No internet connection"
 
 # Modify pacman config
-
 sed -i 's/^#Color/Color/' /etc/pacman.conf
+sed -i 's/^#ParallelDownloads.*/ParallelDownloads = 6/' /etc/pacman.conf
 
 ########################################
 # Time sync
 ########################################
 timedatectl set-ntp true
+
+
+pacman -Sy
+pacman -Sy reflector
+
+reflector \
+  --country Bangladesh,Singapore \
+  --protocol https \
+  --latest 20 \
+  --sort rate \
+  --save /etc/pacman.d/mirrorlist
 
 ########################################
 # Disk selection
@@ -135,8 +202,14 @@ mount $EFI_PART /mnt/boot
 # Base install
 ########################################
 info "Installing base system with pacstrap"
-pacman -Sy
-pacstrap -K /mnt base linux linux-firmware sof-firmware intel-ucode base-devel networkmanager sudo limine
+
+if grep -qi intel /proc/cpuinfo; then
+    CPU_UCODE="intel-ucode"
+else
+    CPU_UCODE="amd-ucode"
+fi
+
+pacstrap -K /mnt base linux linux-firmware sof-firmware "$CPU_UCODE" base-devel networkmanager sudo limine git vim zsh
 
 info "Base system installed with pacstrap"
 
@@ -148,14 +221,16 @@ genfstab -U /mnt > /mnt/etc/fstab
 ########################################
 # Chroot setup
 ########################################
-cp ./*.sh /mnt/
-chmod +x /mnt/chroot.sh
-arch-chroot /mnt /chroot.sh $DISK_NAME
-
-########################################
-# Cleanup
-########################################
-cleanup
+install -m755 ./*.sh /mnt/
+arch-chroot /mnt /chroot.sh \
+    "$DISK" \
+    "$ROOT_PART" \
+    "$HOSTNAME" \
+    "$USERNAME" \
+    "$TIMEZONE" \
+    "$LOCALE" \
+    "$ROOT_PASSWORD" \
+    "$USER_PASSWORD"
 
 ########################################
 # Finish
