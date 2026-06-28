@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-
+# nvidia.sh
 set -euo pipefail
+
+if ! lspci | grep -qi nvidia; then
+    echo "No NVIDIA GPU detected."
+    exit 0
+fi
 
 echo "==> Installing NVIDIA packages"
 
@@ -14,13 +19,14 @@ sudo pacman -S \
     egl-wayland \
     mesa \
     vulkan-icd-loader \
-    libva-nvidia-driver
+    libva-nvidia-driver \
+    nvtop
 
 echo "==> Configuring NVIDIA DRM"
 
 sudo mkdir -p /etc/modprobe.d
 
-cat <<EOF | sudo tee /etc/modprobe.d/nvidia.conf
+cat <<EOF | sudo tee /etc/modprobe.d/nvidia.conf >/dev/null
 options nvidia_drm modeset=1
 EOF
 

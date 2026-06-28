@@ -12,3 +12,5 @@ npm
 github-cli
 
 tmux
+
+code

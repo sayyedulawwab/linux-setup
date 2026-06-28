@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# git.sh
 set -euo pipefail
 
 read -rp "Git name: " GIT_NAME

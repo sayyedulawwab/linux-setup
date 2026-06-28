@@ -1,4 +1,5 @@
-ttf-jetbrains-mono-nerd
-
 noto-fonts
+noto-fonts-cjk
+noto-fonts-extra
 noto-fonts-emoji
+ttf-jetbrains-mono-nerd

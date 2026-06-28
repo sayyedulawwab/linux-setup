@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# setup.sh
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -58,7 +58,7 @@ cd "$REPO_DIR/dotfiles"
 
 for dir in */
 do
-    stow "${dir%/}"
+    stow -R "${dir%/}"
 done
 
 echo "==> Enabling services"
