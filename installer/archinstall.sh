@@ -76,7 +76,7 @@ ping -c 1 archlinux.org >/dev/null || error "No internet"
 
 timedatectl set-ntp true
 
-cp ./pacman.conf /mnt/etc/pacman.conf
+cp ./pacman.conf /etc/pacman.conf
 
 pacman -S --noconfirm --needed reflector
 
@@ -172,6 +172,8 @@ pacstrap -K /mnt \
     less \
     man-db \
     man-pages
+
+cp ./pacman.conf /mnt/etc/pacman.conf
 
 step "Generating fstab"
 genfstab -U /mnt > /mnt/etc/fstab
