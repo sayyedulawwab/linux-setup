@@ -1,6 +1,3 @@
-man-db
-man-pages
-less
 fastfetch
 alacritty
 ripgrep

@@ -32,7 +32,7 @@ EOF
 
 echo "root:$ROOT_PASSWORD" | chpasswd
 
-useradd -m -G wheel -s /bin/bash "$USERNAME"
+useradd -m -G wheel -s /bin/zsh "$USERNAME"
 
 echo "$USERNAME:$USER_PASSWORD" | chpasswd
 

@@ -51,6 +51,9 @@ paru -S --needed --noconfirm "${aur_packages[@]}"
 echo "==> Running NVIDIA setup"
 bash "$REPO_DIR/bootstrap/nvidia.sh"
 
+echo "==> Running Shell setup"
+bash "$REPO_DIR/bootstrap/shell.sh"
+
 echo "==> Running Docker setup"
 bash "$REPO_DIR/bootstrap/docker.sh"
 

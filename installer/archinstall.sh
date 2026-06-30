@@ -161,17 +161,17 @@ pacstrap -K /mnt \
     base-devel \
     networkmanager \
     sudo \
+    efibootmgr \
+    limine \
+    less \
+    man-db \
+    man-pages \
     git \
     vim \
     zsh \
     curl \
     wget \
-    stow \
-    efibootmgr \
-    limine \
-    less \
-    man-db \
-    man-pages
+    stow
 
 cp ./pacman.conf /mnt/etc/pacman.conf
 
