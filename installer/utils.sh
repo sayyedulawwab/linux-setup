@@ -9,13 +9,6 @@ BOLD='\033[1m'
 NC='\033[0m'
 BLUE='\033[0;34m'
 
-LOG_FILE="/tmp/arch-install.log"
-
-info "Installation log: $LOG_FILE"
-
-exec > >(tee -a "$LOG_FILE")
-exec 2>&1
-
 export TERM=xterm-256color
 
 info() {

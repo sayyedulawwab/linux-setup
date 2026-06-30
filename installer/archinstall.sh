@@ -76,14 +76,7 @@ ping -c 1 archlinux.org >/dev/null || error "No internet"
 
 timedatectl set-ntp true
 
-sed -i 's/^#Color/Color/' /etc/pacman.conf
-sed -i '/^#VerbosePkgLists/s/^#//' /etc/pacman.conf
-sed -i '/^#ParallelDownloads/s/^#//' /etc/pacman.conf
-sed -i 's/^ParallelDownloads.*/ParallelDownloads = 6/' /etc/pacman.conf
-sed -i '/^#ILoveCandy/s/^#//' /etc/pacman.conf
-
-grep -q '^Color' /etc/pacman.conf || \
-    echo "Color" >> /etc/pacman.conf
+cp ./pacman.conf /mnt/etc/pacman.conf
 
 pacman -S --noconfirm --needed reflector
 
@@ -203,7 +196,7 @@ arch-chroot /mnt /chroot.sh \
     "$TIMEZONE" \
     "$LOCALE"
 
-SUCCESS=true
+SUCCESS=1
 
 info "Installation completed"
 
