@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-
+# archinstall.sh
 source ./utils.sh
 
-SUCCESS=false
+SUCCESS=0
 
 cleanup() {
     umount -R /mnt 2>/dev/null || true
 }
 
 trap '
-if ! $SUCCESS; then
+if [[ $SUCCESS -eq 0 ]]; then
     cleanup
 fi
 ' EXIT
@@ -18,10 +18,17 @@ trap 'error "Installation failed"' ERR
 
 info "Available disks"
 
-lsblk -d -o NAME,SIZE,MODEL
+mapfile -t DISKS < <(
+    lsblk -dpno NAME,SIZE,MODEL  | grep -v loop
+)
 
-echo
-read -rp "Disk: " DISK
+for i in "${!DISKS[@]}"; do
+    echo "$((i+1))) ${DISKS[$i]}"
+done
+
+read -rp "Select disk: " DISK_INDEX
+
+DISK=$(echo "${DISKS[$((DISK_INDEX-1))]}" | awk '{print $1}')
 
 [[ -b "$DISK" ]] || error "Invalid disk"
 
@@ -61,7 +68,7 @@ EOF
 
 confirm "Continue?" || exit 0
 
-info "Checking internet"
+step "Checking internet"
 
 ping -c 1 archlinux.org >/dev/null || error "No internet"
 
@@ -70,11 +77,17 @@ ping -c 1 archlinux.org >/dev/null || error "No internet"
 timedatectl set-ntp true
 
 sed -i 's/^#Color/Color/' /etc/pacman.conf
+sed -i '/^#VerbosePkgLists/s/^#//' /etc/pacman.conf
 sed -i '/^#ParallelDownloads/s/^#//' /etc/pacman.conf
-sed -i 's/^ParallelDownloads.*/ParallelDownloads = 10/' /etc/pacman.conf
+sed -i 's/^ParallelDownloads.*/ParallelDownloads = 6/' /etc/pacman.conf
+sed -i '/^#ILoveCandy/s/^#//' /etc/pacman.conf
+
+grep -q '^Color' /etc/pacman.conf || \
+    echo "Color" >> /etc/pacman.conf
 
 pacman -S --noconfirm --needed reflector
 
+step "Refreshing mirrorlist"
 reflector \
   --country Bangladesh,Singapore \
   --protocol https \
@@ -109,7 +122,7 @@ info "Wiping disk"
 wipefs -af "$DISK"
 sgdisk --zap-all "$DISK"
 
-info "Partitioning"
+step "Partitioning disk"
 
 parted -s "$DISK" mklabel gpt
 
@@ -122,7 +135,7 @@ parted -s "$DISK" mkpart primary ext4 "$ROOT_END" 100%
 
 udevadm settle
 
-info "Formatting"
+step "Formatting partitions"
 
 mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 -F "$ROOT_PART"
@@ -144,7 +157,7 @@ else
     CPU_UCODE=amd-ucode
 fi
 
-info "Installing base system"
+step "Installing base system"
 
 pacstrap -K /mnt \
     base \
@@ -162,12 +175,20 @@ pacstrap -K /mnt \
     wget \
     stow \
     efibootmgr \
-    limine
+    limine \
+    less \
+    man-db \
+    man-pages
 
+step "Generating fstab"
 genfstab -U /mnt > /mnt/etc/fstab
 
-echo "$ROOT_PASSWORD" >/mnt/root-password
-echo "$USER_PASSWORD" >/mnt/user-password
+step "Configuring system"
+install -m600 /dev/null /mnt/root-password
+printf '%s' "$ROOT_PASSWORD" > /mnt/root-password
+
+install -m600 /dev/null /mnt/user-password
+printf '%s' "$USER_PASSWORD" > /mnt/user-password
 
 chmod 600 /mnt/root-password
 chmod 600 /mnt/user-password

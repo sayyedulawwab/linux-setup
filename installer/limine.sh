@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# limine.sh
 DISK=$1
 ROOT_PART=$2
 
@@ -17,7 +17,13 @@ efibootmgr \
   --label "Arch Linux" \
   --loader '\EFI\BOOT\BOOTX64.EFI'
 
-MICROCODE=$(ls /boot/*-ucode.img | xargs basename)
+if [[ -f /boot/intel-ucode.img ]]; then
+    MICROCODE=intel-ucode.img
+elif [[ -f /boot/amd-ucode.img ]]; then
+    MICROCODE=amd-ucode.img
+else
+    MICROCODE=
+fi
 
 cat >/boot/limine.conf <<EOF
 TIMEOUT=5
@@ -27,7 +33,7 @@ DEFAULT_ENTRY=0
 
 PROTOCOL=linux
 KERNEL_PATH=boot():/vmlinuz-linux
-CMDLINE=root=UUID=${ROOT_UUID} rw
+CMDLINE=root=UUID=${ROOT_UUID} rw quiet loglevel=3
 
 MODULE_PATH=boot():/${MICROCODE}
 MODULE_PATH=boot():/initramfs-linux.img

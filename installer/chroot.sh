@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# chroot.sh
 source /utils.sh
 
 DISK=$1
@@ -41,7 +41,9 @@ echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" >/etc/sudoers.d/00-wheel
 chmod 440 /etc/sudoers.d/00-wheel
 
 systemctl enable NetworkManager
+systemctl mask NetworkManager-wait-online.service
 
+step "Installing Limine"
 bash /limine.sh "$DISK" "$ROOT_PART"
 
 mkinitcpio -P

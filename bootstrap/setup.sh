@@ -2,6 +2,8 @@
 # setup.sh
 set -euo pipefail
 
+export TERM=xterm-256color
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "==> Updating system"
