@@ -52,6 +52,9 @@ bash "$REPO_DIR/bootstrap/nvidia.sh"
 echo "==> Running Docker setup"
 bash "$REPO_DIR/bootstrap/docker.sh"
 
+echo "==> Running Bluetooth setup"
+bash "$REPO_DIR/bootstrap/bluetooth.sh"
+
 echo "==> Applying dotfiles"
 
 cd "$REPO_DIR/dotfiles"
