@@ -38,21 +38,21 @@ DEFAULT_ENTRY=0
 
 /Arch Linux
 
-    PROTOCOL=linux
-    KERNEL_PATH=boot():/vmlinuz-linux
-    CMDLINE=root=UUID=${ROOT_UUID} rw quiet loglevel=3
+    protocol: linux
+    path: boot():/vmlinuz-linux
+    cmdline: root=UUID=${ROOT_UUID} rw quiet loglevel=3
 EOF
 
 # Microcode first if present
 if [[ -n "$MICROCODE" ]]; then
 cat >> /boot/limine.conf <<EOF
-    MODULE_PATH=boot():/${MICROCODE}
+    MODULE_PATH: boot():/${MICROCODE}
 EOF
 fi
 
 # Initramfs second
 cat >> /boot/limine.conf <<EOF
-    MODULE_PATH=boot():/initramfs-linux.img
+    MODULE_PATH: boot():/initramfs-linux.img
 EOF
 
 echo

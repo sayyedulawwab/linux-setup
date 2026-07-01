@@ -1,3 +1,8 @@
+less
+man-db
+man-pages
+curl
+wget
 fastfetch
 alacritty
 ripgrep

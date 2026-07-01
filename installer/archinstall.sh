@@ -163,15 +163,10 @@ pacstrap -K /mnt \
     sudo \
     efibootmgr \
     limine \
-    less \
-    man-db \
-    man-pages \
     git \
     vim \
     zsh \
-    curl \
-    wget \
-    stow
+
 
 cp ./pacman.conf /mnt/etc/pacman.conf
 
